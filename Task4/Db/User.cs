@@ -1,4 +1,5 @@
-﻿namespace Task4.Db
+﻿using Microsoft.EntityFrameworkCore;
+namespace Task4.Db
 {
     public class User
     {

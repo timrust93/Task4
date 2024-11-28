@@ -16,6 +16,13 @@ namespace Task4.Db
             optionsBuilder.UseSqlServer(_config.GetConnectionString("UserDb"));
         }
 
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<User>()
+                .HasIndex(u => u.Email)
+                .IsUnique();
+        }
+
         public DbSet<User> Users { get; set; }
         
     }
