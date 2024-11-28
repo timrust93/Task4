@@ -1,0 +1,45 @@
+﻿@page
+@{
+    Layout = "_AuthPages";
+}
+
+@model Task4.Pages.RegistrationModel
+@{
+}
+
+
+<form method="post">
+    @if (ViewData.ContainsKey(RegistrationModel.RegistrationErrorVD))
+    {
+        <p class="border-danger text-danger">@(ViewData[RegistrationModel.RegistrationErrorVD])</p>
+    }
+
+    <span asp-validation-for="UserRegisterModel.Name" class="text-danger"></span>
+    <div data-mdb-input-init class="form-outline mb-4">
+        <input type="text" id="form2Example22" class="form-control" asp-for="UserRegisterModel.Name" />
+        <label class="form-label" for="form2Example22">Full name</label>
+    </div>
+
+    <span asp-validation-for="UserRegisterModel.Login" class="text-danger"></span>
+    <div data-mdb-input-init class="form-outline mb-4">
+        <input type="email" id="form2Example11" class="form-control"
+               placeholder="email address" asp-for="UserRegisterModel.Login" />
+        <label class="form-label" for="form2Example11">Username</label>
+    </div>
+
+    <span asp-validation-for="UserRegisterModel.Password" class="text-danger"></span>
+    <div data-mdb-input-init class="form-outline mb-4">
+        <input type="password" id="form2Example22" class="form-control" asp-for="UserRegisterModel.Password" />
+        <label class="form-label" for="form2Example22">Password</label>
+    </div>
+
+    <div class="text-center pt-1 mb-5 pb-1">
+        <button data-mdb-ripple-init class="btn btn-primary btn-block fa-lg gradient-custom-2 mb-3" type="submit">
+            Register
+        </button>
+    </div>
+
+    <div class="d-flex align-items-center justify-content-center pb-4">        
+        <a asp-page="/Login" class="btn btn-primary">Go to login</a>
+    </div>
+</form>

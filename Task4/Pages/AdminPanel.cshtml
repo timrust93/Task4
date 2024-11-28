@@ -1,0 +1,146 @@
+﻿@page
+@model Task4.Pages.AdminPanelModel
+@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
+@{
+    string dataUrl = "/AdminPanel?handler=UrlDataSourceAjax";
+    string blockEndpoint = "/AdminPanel?handler=ActOnRecords&userModifyAction=Block";
+    string unblockEndpoint = "/AdminPanel?handler=ActOnRecords&userModifyAction=Unblock";
+    string deleteEndpoint = "/AdminPanel?handler=ActOnRecords&userModifyAction=Delete";
+    string antiForgeryKey = AuthorizationHelpers.AuthHelper.ANTI_FORGERY;
+}
+
+@Html.AntiForgeryToken()
+
+<p>This is admin panel</p>
+<ejs-grid id="Grid" allowSelection="true" toolbarTemplate="#template" queryCellInfo="customizeCell">
+    <e-data-manager url="@dataUrl" adaptor="UrlAdaptor"
+                    headers='@(new Object[] { new Dictionary<string, string> { { antiForgeryKey, Antiforgery.GetAndStoreTokens(HttpContext).RequestToken! } } })'>
+                    </e-data-manager>                    
+    <e-grid-selectionsettings type="Multiple" mode="Row" checkboxonly="true"></e-grid-selectionsettings>    
+    <e-grid-columns>
+        <e-grid-column type="checkbox" headerTemplate="#cbx" width="50"></e-grid-column>
+        <e-grid-column field="email" headerText="email" textAlign="Right"></e-grid-column>
+        <e-grid-column field="name" headerText="name"></e-grid-column>
+        <e-grid-column field="isBlocked" headerText="blocked" width="100" textAlign="Center"></e-grid-column>
+        <e-grid-column field="lastSeenStr" headerText="last seen" textAlign="Left"></e-grid-column>
+    </e-grid-columns>
+</ejs-grid>
+
+ <div id="cbx">
+</div>
+
+<div id="template">
+    <ejs-toolbar id="defaultToolbar" clicked="clickHandler">
+        <e-toolbar-items>
+            <e-toolbar-item id="selectAll" template="#selectAll"></e-toolbar-item>
+            <e-toolbar-item type="Separator"></e-toolbar-item>
+            <e-toolbar-item template="#btnLock"></e-toolbar-item>
+            <e-toolbar-item type="Separator"></e-toolbar-item>
+            <e-toolbar-item type="Separator"></e-toolbar-item>
+            <e-toolbar-item template="#btnUnlock"></e-toolbar-item>
+            <e-toolbar-item type="Separator"></e-toolbar-item>
+            <e-toolbar-item template="#btnDelete"></e-toolbar-item>
+        </e-toolbar-items>      
+    </ejs-toolbar>
+</div>
+
+<button id="btnLock" class="btn btn-outline-primary btn-sm" style="font-size:10px"
+        data-url="@blockEndpoint">
+    block <img src="~/icons/lock.png" style="height:10px" />
+</button>
+<button id="btnUnlock" class="btn btn-outline-primary btn-sm" style="font-size:10px"
+        data-url="@unblockEndpoint">
+    unblock <img src="~/icons/unlocked.png" style="height:10px" />
+</button>
+<button id="btnDelete" class="btn btn-outline-primary btn-sm" style="font-size:10px"
+        data-url="@deleteEndpoint">
+    <img src="~/icons/delete.png" style="height:10px" />
+</button>
+
+<ejs-checkbox id="selectAll" class="e-check-select-all" onclick="selectAllRowsCbxHandler()">
+</ejs-checkbox>
+
+
+<script>
+    function updateGrid()
+    {
+        alert("update grid button");
+        var gridInstance = document.getElementById("Grid").ej2_instances[0];
+        gridInstance.refresh();
+    }
+
+    function clickHandler(args) {
+        
+        var target = args.originalEvent.target.closest('button'); //find clicked button
+        if (target == null) return;
+        
+        link = target.dataset.url;
+
+        var gridInstance = document.getElementById("Grid").ej2_instances[0];
+        selectedRowIndexes = gridInstance.getSelectedRecords();
+        let selectedIds = selectedRowIndexes.map(o => o.id);
+        
+        let antiforgeryKey = "@antiForgeryKey";
+        let token = document.querySelector("[name='__RequestVerificationToken']").value;
+        fetch(link, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    [antiforgeryKey] : token,
+                },
+                body: JSON.stringify(selectedIds)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.redirectUrl)
+                {
+                    alert(data.reason);
+                    window.location.href = data.redirectUrl;
+                    return;
+                }
+                console.log('Server response:', data);
+                gridInstance.refresh();
+                alert('Rows processed successfully!');
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Something went wrong! ');
+            });                    
+    };
+
+
+    var allRowsSelected = false;
+    function selectAllRowsCbxHandler(args) {
+        var gridInstance = document.getElementById("Grid").ej2_instances[0];
+        if (allRowsSelected) {
+            gridInstance.clearSelection();            
+            allRowsSelected = false;
+            return;
+        }
+        var rowCount = gridInstance.getRows().length;
+        var rowIndexes = [];
+        for (var i = 0; i < rowCount; i++) {
+            let rowElement = gridInstance.getRowsObject()[i];         
+            rowIndexes.push(i);
+        }
+        
+        gridInstance.selectRows(rowIndexes);
+        allRowsSelected = true;        
+    }
+
+    function customizeCell(args)
+    {
+        if (args.column.field === 'isBlocked')
+        {
+            if (args.data['isBlocked'])
+            {
+                args.cell.innerHTML = "&#10003;";
+            }
+            else
+            {
+                args.cell.innerHTML = "";
+            }                                            
+        }
+    }
+</script>
+
