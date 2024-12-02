@@ -13,7 +13,11 @@ namespace Task4.Db
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlServer(_config.GetConnectionString("UserDb"));
+            string connStr = Environment.GetEnvironmentVariable("TASK_4_CONN_STRING", EnvironmentVariableTarget.Process)
+                ?? Environment.GetEnvironmentVariable("TASK_4_CONN_STRING", EnvironmentVariableTarget.Machine)
+                ?? throw new InvalidOperationException("Connection string not found in environment variables.");
+
+            optionsBuilder.UseSqlServer(connStr);
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

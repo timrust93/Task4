@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.EntityFrameworkCore.Internal;
 using Task4.AuthorizationHelpers;
 using Task4.Db;
+using Task4.Migrations;
 using Task4.Services;
 
 
@@ -13,10 +14,14 @@ builder.Services.AddRazorPages();
 builder.Services.AddScoped<AppDbContext>();
 builder.Services.AddScoped<RegistrationServices>();
 
+
+builder.Configuration.AddEnvironmentVariables();
+
+
 Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense("Ngo9BigBOggjHTQxAR8/V1NDaF5cWWtCf1FpRmJGdld5fUVHYVZUTXxaS00DNHVRdkdnWH5cdHRcR2BcV0d0V0s=");
 
 builder.Services.AddAuthentication(AuthHelper.AUTH_COOKIE).AddCookie(AuthHelper.AUTH_COOKIE, options =>
-{
+{    
     options.Cookie.Name = AuthHelper.AUTH_COOKIE;
     options.ExpireTimeSpan = TimeSpan.FromMinutes(5);
 });
@@ -46,7 +51,5 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapRazorPages();
-
-
 
 app.Run();

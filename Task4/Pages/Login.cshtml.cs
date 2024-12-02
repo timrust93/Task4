@@ -16,14 +16,13 @@ namespace Task4.Pages
         private readonly RegistrationServices _registrationServices;
 
         public static string InvalidCredentialVD => ("InvalidCredentials");
-        
 
         public LoginModel(RegistrationServices registrationServices)
         {
             _registrationServices = registrationServices;
         }
 
-        public async Task<IActionResult> OnPost()
+    public async Task<IActionResult> OnPost()
         {
             if (!ModelState.IsValid)
             {
